@@ -6,7 +6,7 @@ server:
   servlet:
     context-path: /
 
-  port: 8109
+  port: 8189
 
 logging:
   level:
