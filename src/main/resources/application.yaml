@@ -12,7 +12,6 @@ spring:
     properties:
       hibernate:
         default_schema: v1_iam_service
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
     hibernate:
       ddl-auto: update
@@ -22,17 +21,17 @@ spring:
     locations: classpath:db/migration
     schemas: v1_iam_service
 
-
 server:
   servlet:
     context-path: /
 
   port: 8109
 
-
-
 logging:
   level:
     root: info
     org.springframework.web: debug
     org.flywaydb: debug
+
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace
