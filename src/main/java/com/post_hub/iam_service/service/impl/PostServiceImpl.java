@@ -1,5 +1,6 @@
 package com.post_hub.iam_service.service.impl;
 
+import com.post_hub.iam_service.mapper.PostMapper;
 import com.post_hub.iam_service.model.constants.ApiErrorMessage;
 import com.post_hub.iam_service.model.dto.post.PostDTO;
 import com.post_hub.iam_service.model.enteties.Post;
@@ -16,9 +17,11 @@ import org.springframework.stereotype.Service;
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
+    private final PostMapper postMapper;
 
-    public PostServiceImpl(PostRepository postRepository) {
+    public PostServiceImpl(PostRepository postRepository, PostMapper postMapper) {
         this.postRepository = postRepository;
+        this.postMapper = postMapper;
     }
 
 
@@ -27,14 +30,7 @@ public class PostServiceImpl implements PostService {
         Post post  = postRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(postId)));
 
-        PostDTO postDTO = PostDTO.builder()
-                .id(post.getId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .likes(post.getLikes())
-                .created(post.getCreated())
-                .build();
-
+        PostDTO postDTO = postMapper.toPostDTO(post);
 
         return IamResponse.createSuccessful(postDTO);
     }
