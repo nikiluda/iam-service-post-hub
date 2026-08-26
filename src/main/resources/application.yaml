@@ -29,7 +29,7 @@ server:
 
 logging:
   level:
-    root: info
+    com.post_hub.iam_service: TRACE
     org.springframework.web: debug
     org.flywaydb: debug
 
