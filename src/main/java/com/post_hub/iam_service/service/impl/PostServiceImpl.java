@@ -6,13 +6,15 @@ import com.post_hub.iam_service.model.dto.post.PostDTO;
 import com.post_hub.iam_service.model.enteties.Post;
 import com.post_hub.iam_service.model.exception.DataExistsException;
 import com.post_hub.iam_service.model.exception.NotFoundException;
-import com.post_hub.iam_service.model.request.post.PostRequest;
+import com.post_hub.iam_service.model.request.post.NewPostRequest;
+import com.post_hub.iam_service.model.request.post.UpdatePostRequest;
 import com.post_hub.iam_service.model.response.IamResponse;
 import com.post_hub.iam_service.repositories.PostRepository;
 import com.post_hub.iam_service.service.PostService;
-import org.antlr.v4.runtime.misc.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 
 
 @Service
@@ -38,17 +40,27 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public IamResponse<PostDTO> createPost(PostRequest postRequest) {
-        if (postRepository.existsByTitle(postRequest.getTitle())) {
-            throw new DataExistsException(ApiErrorMessage.POST_ALREADY_EXISTS.getMessage(postRequest.getTitle()));
+    public IamResponse<PostDTO> createPost(NewPostRequest newPostRequest) {
+        if (postRepository.existsByTitle(newPostRequest.getTitle())) {
+            throw new DataExistsException(ApiErrorMessage.POST_ALREADY_EXISTS.getMessage(newPostRequest.getTitle()));
         }
 
-        Post post  = postMapper.createPost(postRequest);
+        Post post  = postMapper.createPost(newPostRequest);
         Post savedPost = postRepository.save(post);
 
         PostDTO postDTO = postMapper.toPostDTO(savedPost);
 
         return IamResponse.createSuccessful(postDTO);
+    }
+
+    @Override
+    public IamResponse<PostDTO> updatePost(@NotNull Integer postId, @NotNull UpdatePostRequest updatePostRequest) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(postId)));
+        postMapper.updatePost(post, updatePostRequest);
+        post.setUpdated(LocalDateTime.now());
+        postRepository.save(post);
+        return IamResponse.createSuccessful(postMapper.toPostDTO(post));
     }
 
 
