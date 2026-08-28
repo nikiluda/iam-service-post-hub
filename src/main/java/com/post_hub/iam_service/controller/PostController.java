@@ -5,19 +5,18 @@ import com.post_hub.iam_service.model.dto.post.PostDTO;
 
 import com.post_hub.iam_service.model.dto.post.PostSearchDTO;
 import com.post_hub.iam_service.model.request.post.NewPostRequest;
+import com.post_hub.iam_service.model.request.post.PostSearchRequest;
 import com.post_hub.iam_service.model.request.post.UpdatePostRequest;
 import com.post_hub.iam_service.model.response.IamResponse;
 import com.post_hub.iam_service.model.response.PaginationResponse;
 import com.post_hub.iam_service.service.PostService;
 import com.post_hub.iam_service.utils.ApiUtils;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.support.InterceptingHttpAccessor;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -83,4 +82,17 @@ public class PostController {
         IamResponse<PaginationResponse<PostSearchDTO>> response = postService.findAllPosts(pageable);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("${end-points.search}")
+    public ResponseEntity<IamResponse<PaginationResponse<PostSearchDTO>>> searchPosts(
+            @RequestBody @Valid PostSearchRequest postSearchRequest,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "limit", defaultValue = "10") int limit) {
+        log.trace(ApiLogMessage.NAME_OF_CURRENT_METHOD.getValue(), ApiUtils.getMethodName());
+
+        Pageable pageable = PageRequest.of(page, limit);
+        IamResponse<PaginationResponse<PostSearchDTO>> response = postService.searchPosts(postSearchRequest, pageable);
+        return ResponseEntity.ok(response);
+    }
+
 }
