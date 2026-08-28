@@ -39,3 +39,4 @@ logging:
 end-points:
   create: /create
   id: /{id}
+  all: /all
