@@ -1,4 +1,4 @@
-package com.post_hub.iam_service.model.enteties;
+package com.post_hub.iam_service.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
