@@ -2,10 +2,15 @@ package com.post_hub.iam_service.controller;
 
 
 
+import com.post_hub.iam_service.model.constants.ApiErrorMessage;
 import com.post_hub.iam_service.model.constants.ApiLogMessage;
 import com.post_hub.iam_service.model.dto.user.UserDTO;
+import com.post_hub.iam_service.model.entity.User;
+import com.post_hub.iam_service.model.exception.NotFoundException;
 import com.post_hub.iam_service.model.request.user.NewUserRequest;
+import com.post_hub.iam_service.model.request.user.UpdateUserRequest;
 import com.post_hub.iam_service.model.response.IamResponse;
+import com.post_hub.iam_service.repository.UserRepository;
 import com.post_hub.iam_service.service.UserService;
 import com.post_hub.iam_service.utils.ApiUtils;
 import jakarta.validation.Valid;
@@ -25,6 +30,7 @@ public class UserController {
 
 
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @GetMapping("${end-points.id}")
     public ResponseEntity<IamResponse<UserDTO>> getUserById(@PathVariable(name = "id") Integer userId) {
@@ -48,5 +54,17 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    @PutMapping("${end-points.id}")
+    public ResponseEntity<IamResponse<UserDTO>> updateUserById(
+            @PathVariable(name = "id") Integer userId,
+            @RequestBody @Valid UpdateUserRequest updateUserRequest) {
+
+        log.trace(ApiLogMessage.NAME_OF_CURRENT_METHOD.getValue(), ApiUtils.getMethodName());
+
+        IamResponse<UserDTO> response = userService.updateUser(userId,updateUserRequest);
+        return ResponseEntity.ok(response);
+
     }
 }

@@ -16,12 +16,15 @@ CREATE TABLE users (
 
 CREATE TABLE posts(
                                             id BIGSERIAL PRIMARY KEY ,
+                                            user_id INTEGER NOT NULL ,
                                             title varchar(255) NOT NULL ,
                                             content text NOT NULL ,
                                             created timestamp NOT NULL  DEFAULT current_timestamp,
                                             updated timestamp NOT NULL  DEFAULT current_timestamp,
                                             deleted BOOLEAN NOT NULL DEFAULT false,
                                             likes integer NOT NULL default 0,
+                                            created_by varchar(50),
+                                            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ,
                                             unique (title)
 );
 INSERT INTO users(username, password, email, created, updated, registration_status, last_login, deleted ) VALUES
@@ -32,6 +35,6 @@ INSERT INTO users(username, password, email, created, updated, registration_stat
 
 
 
-INSERT INTO posts(title, content, created, updated, deleted,  likes) VALUES
-                                                      ('First Post', 'This is content of the first post', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP, false,  10),
-                                                      ('Second Post', 'This is content of the second post', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP, false,  3);
+INSERT INTO posts(user_id, title, content, created, updated, deleted,  likes) VALUES
+                                                      (1,'First Post', 'This is content of the first post', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP, false,  10),
+                                                      (2,'Second Post', 'This is content of the second post', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP, false,  3);
