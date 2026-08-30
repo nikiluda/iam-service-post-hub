@@ -13,4 +13,6 @@ public interface UserService {
     IamResponse<UserDTO> createUser(@NotNull NewUserRequest newUserRequest);
 
     IamResponse<UserDTO> updateUser(@NotNull Integer userId, @NotNull UpdateUserRequest updateUserRequest);
+
+    void softDeleteUser(@NotNull Integer userId);
 }

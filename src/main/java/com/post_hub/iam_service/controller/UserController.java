@@ -67,4 +67,16 @@ public class UserController {
         return ResponseEntity.ok(response);
 
     }
+
+
+    @DeleteMapping("${end-points.id}")
+    public ResponseEntity<Void> deleteById(@PathVariable(name = "id") Integer userID) {
+
+        log.trace(ApiLogMessage.NAME_OF_CURRENT_METHOD.getValue(), ApiUtils.getMethodName());
+
+        userService.softDeleteUser(userID);
+
+        return ResponseEntity.noContent().build();
+
+    }
 }
