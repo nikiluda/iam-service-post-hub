@@ -5,7 +5,9 @@ import com.post_hub.iam_service.mapper.UserMapper;
 import com.post_hub.iam_service.model.constants.ApiErrorMessage;
 import com.post_hub.iam_service.model.dto.user.UserDTO;
 import com.post_hub.iam_service.model.entity.User;
+import com.post_hub.iam_service.model.exception.DataExistsException;
 import com.post_hub.iam_service.model.exception.NotFoundException;
+import com.post_hub.iam_service.model.request.user.NewUserRequest;
 import com.post_hub.iam_service.model.response.IamResponse;
 import com.post_hub.iam_service.repository.UserRepository;
 import com.post_hub.iam_service.service.UserService;
@@ -34,5 +36,21 @@ public class UserServiceImpl implements UserService {
         return IamResponse.createSuccessful(userDTO);
 
 
+    }
+
+    @Override
+    public IamResponse<UserDTO> createUser(@NotNull NewUserRequest newUserRequest) {
+        if (userRepository.existsByUsername(newUserRequest.getUsername())) {
+            throw new DataExistsException(ApiErrorMessage.USERNAME_ALREADY_EXISTS.getMessage(newUserRequest.getUsername()));
+        }
+
+        if (userRepository.existsByEmail(newUserRequest.getEmail())) {
+            throw new DataExistsException(ApiErrorMessage.EMAIL_ALREADY_EXISTS.getMessage(newUserRequest.getEmail()));
+        }
+
+        User user = userMapper.createUser(newUserRequest);
+        User savedUser = userRepository.save(user);
+        UserDTO userDTO = userMapper.toDto(savedUser);
+        return IamResponse.createSuccessful(userDTO);
     }
 }

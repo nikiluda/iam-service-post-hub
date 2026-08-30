@@ -40,10 +40,10 @@ public class User {
 
 
     @Column(nullable = false)
-    private LocalDateTime created;
+    private LocalDateTime created = LocalDateTime.now();
 
     @Column(nullable = false)
-    private LocalDateTime updated;
+    private LocalDateTime updated = LocalDateTime.now();
 
 
     @Column()
