@@ -1,10 +1,13 @@
 package com.post_hub.iam_service.service;
 
+import com.post_hub.iam_service.model.dto.post.PostSearchDTO;
 import com.post_hub.iam_service.model.dto.user.UserDTO;
 import com.post_hub.iam_service.model.request.user.NewUserRequest;
 import com.post_hub.iam_service.model.request.user.UpdateUserRequest;
 import com.post_hub.iam_service.model.response.IamResponse;
+import com.post_hub.iam_service.model.response.PaginationResponse;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.domain.Pageable;
 
 public interface UserService {
 
@@ -15,4 +18,5 @@ public interface UserService {
     IamResponse<UserDTO> updateUser(@NotNull Integer userId, @NotNull UpdateUserRequest updateUserRequest);
 
     void softDeleteUser(@NotNull Integer userId);
+
 }

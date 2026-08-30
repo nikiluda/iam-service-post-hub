@@ -1,12 +1,8 @@
 package com.post_hub.iam_service.controller;
 
 
-
-import com.post_hub.iam_service.model.constants.ApiErrorMessage;
 import com.post_hub.iam_service.model.constants.ApiLogMessage;
 import com.post_hub.iam_service.model.dto.user.UserDTO;
-import com.post_hub.iam_service.model.entity.User;
-import com.post_hub.iam_service.model.exception.NotFoundException;
 import com.post_hub.iam_service.model.request.user.NewUserRequest;
 import com.post_hub.iam_service.model.request.user.UpdateUserRequest;
 import com.post_hub.iam_service.model.response.IamResponse;
@@ -79,4 +75,6 @@ public class UserController {
         return ResponseEntity.noContent().build();
 
     }
+
+
 }
