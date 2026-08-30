@@ -41,3 +41,4 @@ end-points:
   id: /{id}
   all: /all
   search: /search
+  users: /users

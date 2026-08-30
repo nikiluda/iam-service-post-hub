@@ -1,4 +1,4 @@
-package com.post_hub.iam_service.repositories;
+package com.post_hub.iam_service.repository;
 
 import com.post_hub.iam_service.model.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;

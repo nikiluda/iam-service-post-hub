@@ -1,4 +1,4 @@
-package com.post_hub.iam_service.repositories.criteria;
+package com.post_hub.iam_service.repository.criteria;
 
 import com.post_hub.iam_service.model.entity.Post;
 import com.post_hub.iam_service.model.request.post.PostSearchRequest;
