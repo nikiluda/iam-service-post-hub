@@ -48,8 +48,8 @@ public class User {
     private LocalDateTime updated = LocalDateTime.now();
 
 
-    @Column()
-    private LocalDateTime last_login;
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
 
 
     @Column(nullable = false)

@@ -24,7 +24,6 @@ import java.util.List;
 public interface UserMapper {
 
 
-    @Mapping(source = "last_login", target = "lastLogin")
     @Mapping(source = "created", target = "createdAt")
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "roles", expression = "java(mapRoles(user.getRoles()))")
