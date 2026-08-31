@@ -1,7 +1,9 @@
 package com.post_hub.iam_service.mapper;
 
 
+import com.post_hub.iam_service.model.dto.role.RoleDTO;
 import com.post_hub.iam_service.model.dto.user.UserDTO;
+import com.post_hub.iam_service.model.entity.Role;
 import com.post_hub.iam_service.model.entity.User;
 import com.post_hub.iam_service.model.enums.RegistrationStatus;
 import com.post_hub.iam_service.model.request.user.NewUserRequest;
@@ -10,6 +12,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+
+import java.util.Collection;
+import java.util.List;
 
 @Mapper(
         componentModel = "spring",
@@ -22,6 +27,7 @@ public interface UserMapper {
     @Mapping(source = "last_login", target = "lastLogin")
     @Mapping(source = "created", target = "createdAt")
     @Mapping(target = "password", ignore = true)
+    @Mapping(target = "roles", expression = "java(mapRoles(user.getRoles()))")
     UserDTO toDto(User user);
 
 
@@ -35,5 +41,11 @@ public interface UserMapper {
     @Mapping(target = "created", ignore = true)
     @Mapping(target = "password", ignore = true)
     void updateUser(@MappingTarget User user, UpdateUserRequest request);
+
+    default List<RoleDTO> mapRoles(Collection<Role> rOles) {
+        return rOles.stream()
+                .map(role -> new RoleDTO(role.getId(), role.getName()))
+                .toList();
+    }
 
 }

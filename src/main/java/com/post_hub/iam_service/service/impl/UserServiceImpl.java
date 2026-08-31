@@ -4,19 +4,24 @@ package com.post_hub.iam_service.service.impl;
 import com.post_hub.iam_service.mapper.UserMapper;
 import com.post_hub.iam_service.model.constants.ApiErrorMessage;
 import com.post_hub.iam_service.model.dto.user.UserDTO;
+import com.post_hub.iam_service.model.entity.Role;
 import com.post_hub.iam_service.model.entity.User;
 import com.post_hub.iam_service.model.exception.DataExistsException;
 import com.post_hub.iam_service.model.exception.NotFoundException;
 import com.post_hub.iam_service.model.request.user.NewUserRequest;
 import com.post_hub.iam_service.model.request.user.UpdateUserRequest;
 import com.post_hub.iam_service.model.response.IamResponse;
+import com.post_hub.iam_service.repository.RoleRepository;
 import com.post_hub.iam_service.repository.UserRepository;
 import com.post_hub.iam_service.service.UserService;
+import com.post_hub.iam_service.service.model.IamServiceUserRole;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -25,11 +30,13 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -54,8 +61,15 @@ public class UserServiceImpl implements UserService {
             throw new DataExistsException(ApiErrorMessage.EMAIL_ALREADY_EXISTS.getMessage(newUserRequest.getEmail()));
         }
 
+        Role role = roleRepository.findByName(IamServiceUserRole.USER.getRole())
+                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.USER_ROLE_NOT_FOUND.getMessage()));
+
         User user = userMapper.createUser(newUserRequest);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        Set<Role> roles = new HashSet<>();
+        roles.add(role);
+        user.setRoles(roles);
+
         User savedUser = userRepository.save(user);
         UserDTO userDTO = userMapper.toDto(savedUser);
         return IamResponse.createSuccessful(userDTO);
