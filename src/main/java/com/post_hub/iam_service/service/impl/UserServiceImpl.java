@@ -13,6 +13,7 @@ import com.post_hub.iam_service.model.response.IamResponse;
 import com.post_hub.iam_service.repository.UserRepository;
 import com.post_hub.iam_service.service.UserService;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,10 +24,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -52,6 +55,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = userMapper.createUser(newUserRequest);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
         UserDTO userDTO = userMapper.toDto(savedUser);
         return IamResponse.createSuccessful(userDTO);

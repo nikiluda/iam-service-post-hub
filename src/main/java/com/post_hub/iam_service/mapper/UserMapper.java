@@ -21,6 +21,7 @@ public interface UserMapper {
 
     @Mapping(source = "last_login", target = "lastLogin")
     @Mapping(source = "created", target = "createdAt")
+    @Mapping(target = "password", ignore = true)
     UserDTO toDto(User user);
 
 
