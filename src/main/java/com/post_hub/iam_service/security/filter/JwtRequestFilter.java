@@ -4,6 +4,7 @@ import com.post_hub.iam_service.model.constants.ApiErrorMessage;
 import com.post_hub.iam_service.security.JwtTokenProvider;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,15 +15,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import io.jsonwebtoken.security.SignatureException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 
 @Slf4j
 @Component
@@ -36,9 +36,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
 
         Optional<String> authHeader = Optional.ofNullable(request.getHeader(AUTHORIZATION_HEADER));
         String requestURI = request.getRequestURI();
@@ -51,20 +51,22 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     throw new ExpiredJwtException(null, null, ApiErrorMessage.TOKEN_EXPIRED.getMessage());
                 }
 
-                Optional<String> emailOpt = Optional.ofNullable(jwtTokenProvider.getEmail(jwt));
-                emailOpt.ifPresent(email -> {
-                    if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                        List<SimpleGrantedAuthority> authorities = jwtTokenProvider.getRoles(jwt).stream()
-                                .map(SimpleGrantedAuthority::new)
-                                .collect(Collectors.toList());
+                String email = jwtTokenProvider.getEmail(jwt);
 
-                        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                                email,
-                                null,
-                                authorities
-                        );
-                    }
-                });
+                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    List<SimpleGrantedAuthority> authorities = jwtTokenProvider.getRoles(jwt).stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList());
+
+                    UsernamePasswordAuthenticationToken authenticationToken =
+                            new UsernamePasswordAuthenticationToken(email, null, authorities);
+
+                    authenticationToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    // главное исправление — без этой строки аутентификация не работала вообще
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                }
             } catch (ExpiredJwtException e) {
                 handleTokenExpiration(requestURI, jwt, response);
                 return;
@@ -72,10 +74,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 handleSignatureException(response);
                 return;
             } catch (Exception exception) {
-                handleUnexpectedException(response, exception );
+                handleUnexpectedException(response, exception);
                 return;
             }
-
         }
         filterChain.doFilter(request, response);
     }
@@ -84,9 +85,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (isAuthEndpoint(requestURI)) {
             String refreshedToken = jwtTokenProvider.refreshToken(jwt);
             response.setHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + refreshedToken);
-
         } else {
-            sendErrorResponse(response, HttpStatus.UNAUTHORIZED,ApiErrorMessage.TOKEN_EXPIRED.getMessage());
+            sendErrorResponse(response, HttpStatus.UNAUTHORIZED, ApiErrorMessage.TOKEN_EXPIRED.getMessage());
         }
     }
 
@@ -97,19 +97,17 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private void handleUnexpectedException(HttpServletResponse response, Exception exception) throws IOException {
         log.error(ApiErrorMessage.ERROR_DURING_JWT_PROCESSING.getMessage(), exception);
         sendErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorMessage.UNEXPECTED_ERROR_OCCURRED.getMessage());
-
     }
-
 
     private void sendErrorResponse(HttpServletResponse response, HttpStatus status, String message) throws IOException {
         response.setStatus(status.value());
-        response.getWriter();
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(
+                String.format("{\"status\":%d,\"message\":\"%s\"}", status.value(), message)
+        );
     }
-
 
     private boolean isAuthEndpoint(String requestURI) {
         return requestURI.equals(LOGIN_PATH) || requestURI.equals(REGISTER_PATH);
     }
-
-
 }

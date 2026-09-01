@@ -13,6 +13,8 @@ public enum ApiErrorMessage {
     USERNAME_ALREADY_EXISTS("Username: %s already exists"),
     EMAIL_ALREADY_EXISTS("Email: %s already exists"),
     USER_ROLE_NOT_FOUND("Role was not found"),
+    EMAIL_NOT_FOUND("Email: %s was not found"),
+
 
     ERROR_DURING_JWT_PROCESSING("An unexpected error occurred during JWT processing"),
     TOKEN_EXPIRED("Token expired"),
