@@ -24,7 +24,7 @@ public class UserProfileDTO implements Serializable {
 
     private LocalDateTime lastLogin;
 
-    private String toke;
+    private String token;
 
     private List<RoleDTO> roles;
 

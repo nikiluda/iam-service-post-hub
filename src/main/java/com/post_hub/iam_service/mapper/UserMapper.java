@@ -3,6 +3,7 @@ package com.post_hub.iam_service.mapper;
 
 import com.post_hub.iam_service.model.dto.role.RoleDTO;
 import com.post_hub.iam_service.model.dto.user.UserDTO;
+import com.post_hub.iam_service.model.dto.user.UserProfileDTO;
 import com.post_hub.iam_service.model.entity.Role;
 import com.post_hub.iam_service.model.entity.User;
 import com.post_hub.iam_service.model.enums.RegistrationStatus;
@@ -40,6 +41,20 @@ public interface UserMapper {
     @Mapping(target = "created", ignore = true)
     @Mapping(target = "password", ignore = true)
     void updateUser(@MappingTarget User user, UpdateUserRequest request);
+
+
+
+    @Mapping(target = "username", source = "user.username")
+    @Mapping(target = "email", source = "user.email")
+    @Mapping(target = "token", source = "token")
+    @Mapping(target = "roles", expression = "java(mapRoles(user.getRoles()))")
+    UserProfileDTO toUserProfileDto(User user, String token);
+
+
+
+
+
+
 
     default List<RoleDTO> mapRoles(Collection<Role> rOles) {
         return rOles.stream()
