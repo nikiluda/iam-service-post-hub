@@ -18,9 +18,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -35,6 +38,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private static final String REGISTER_PATH = "/auth/register";
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -90,8 +94,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
     }
 
-    private void handleSignatureException(HttpServletResponse response) throws IOException {
-        sendErrorResponse(response, HttpStatus.UNAUTHORIZED, ApiErrorMessage.INVALID_TOKEN_SIGNATURE.getMessage());
+    private void handleSignatureException(
+            HttpServletResponse response
+    ) throws IOException {
+
+        sendErrorResponse(
+                response,
+                HttpStatus.UNAUTHORIZED,
+                ApiErrorMessage.INVALID_TOKEN_SIGNATURE.getMessage()
+        );
     }
 
     private void handleUnexpectedException(HttpServletResponse response, Exception exception) throws IOException {
@@ -99,12 +110,21 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         sendErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR, ApiErrorMessage.UNEXPECTED_ERROR_OCCURRED.getMessage());
     }
 
-    private void sendErrorResponse(HttpServletResponse response, HttpStatus status, String message) throws IOException {
+    private void sendErrorResponse(
+            HttpServletResponse response,
+            HttpStatus status,
+            String message
+    ) throws IOException {
+
         response.setStatus(status.value());
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(
-                String.format("{\"status\":%d,\"message\":\"%s\"}", status.value(), message)
-        );
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", status.value());
+        body.put("message", message);
+
+        objectMapper.writeValue(response.getWriter(), body);
     }
 
     private boolean isAuthEndpoint(String requestURI) {

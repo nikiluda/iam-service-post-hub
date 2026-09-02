@@ -42,6 +42,8 @@ end-points:
   all: /all
   search: /search
   users: /users
+  auth: /auth
+  login: /login
 
 jwt:
   secret: AQluFxA7o6Hp+QZq4Q8GxQhjBC49M+a/HBjgob2dUwMroeWlfSxdl3bB/07PQgKlWl6NaJZiAeektuCi/CAuMw==
