@@ -47,6 +47,15 @@ CREATE TABLE users_roles(
                                             FOREIGN KEY (role_id) REFERENCES roles (id)
 );
 
+CREATE TABLE refresh_token(
+                                            id SERIAL PRIMARY KEY ,
+                                            token varchar(128) NOT NULL ,
+                                            created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                            user_id BIGINT NOT NULL,
+                                            CONSTRAINT FK_refresh_tokens_user FOREIGN KEY (user_id) references users(id) ON DELETE CASCADE ,
+                                            CONSTRAINT refresh_token_UNIQUE UNIQUE (user_id, id)
+);
+
 
 
 
