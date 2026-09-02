@@ -4,12 +4,14 @@ import com.post_hub.iam_service.mapper.UserMapper;
 import com.post_hub.iam_service.model.constants.ApiErrorMessage;
 import com.post_hub.iam_service.model.dto.user.LoginRequest;
 import com.post_hub.iam_service.model.dto.user.UserProfileDTO;
+import com.post_hub.iam_service.model.entity.RefreshToken;
 import com.post_hub.iam_service.model.entity.User;
 import com.post_hub.iam_service.model.exception.InvalidDataException;
 import com.post_hub.iam_service.model.response.IamResponse;
 import com.post_hub.iam_service.repository.UserRepository;
 import com.post_hub.iam_service.security.JwtTokenProvider;
 import com.post_hub.iam_service.service.AuthService;
+import com.post_hub.iam_service.service.RefreshTokenService;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,10 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
+    private final RefreshTokenService refreshTokenService;
+
+
+
     @Override
     public IamResponse<UserProfileDTO> login(@NotNull LoginRequest request) {
         try {
@@ -46,5 +52,16 @@ public class AuthServiceImpl implements AuthService {
         userProfileDTO.setToken(token);
 
         return IamResponse.createSuccessfulWithNewToken(userProfileDTO);
+    }
+
+    @Override
+    public IamResponse<UserProfileDTO> refreshAccessToken(String refreshTokenValue) {
+        RefreshToken refreshToken = refreshTokenService.validateAndRefreshToken(refreshTokenValue);
+        User user = refreshToken.getUser();
+
+        String accessToken = jwtTokenProvider.generateToken(user);
+
+        return IamResponse.createSuccessfulWithNewToken(
+                userMapper.toUserProfileDto(user,accessToken));
     }
 }
