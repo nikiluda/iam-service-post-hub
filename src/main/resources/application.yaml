@@ -44,6 +44,9 @@ end-points:
   users: /users
   auth: /auth
   login: /login
+  refresh:
+    token: /refresh/token
+  register: /register
 
 jwt:
   secret: AQluFxA7o6Hp+QZq4Q8GxQhjBC49M+a/HBjgob2dUwMroeWlfSxdl3bB/07PQgKlWl6NaJZiAeektuCi/CAuMw==

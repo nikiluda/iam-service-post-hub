@@ -4,6 +4,7 @@ package com.post_hub.iam_service.controller;
 
 import com.post_hub.iam_service.model.constants.ApiLogMessage;
 import com.post_hub.iam_service.model.dto.user.LoginRequest;
+import com.post_hub.iam_service.model.dto.user.RegistrationUserRequest;
 import com.post_hub.iam_service.model.dto.user.UserProfileDTO;
 import com.post_hub.iam_service.model.response.IamResponse;
 import com.post_hub.iam_service.service.AuthService;
@@ -15,10 +16,7 @@ import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -40,4 +38,29 @@ public class AuthController {
         httpServletResponse.addCookie(authorizationCookie);
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("${end-points.refresh.token}")
+    public ResponseEntity<IamResponse<UserProfileDTO>> refreshToken(
+            @RequestParam(name = "token") String refreshToken,
+            HttpServletResponse response) {
+        log.trace(ApiLogMessage.NAME_OF_CURRENT_METHOD.getValue(), ApiUtils.getMethodName());
+
+        IamResponse<UserProfileDTO> result = authService.refreshAccessToken(refreshToken);
+        Cookie authorizationCookie = ApiUtils.createAuthCookie(result.getPayload().getToken());
+        response.addCookie(authorizationCookie);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("${end-points.register}")
+    public ResponseEntity<?> register(@RequestBody RegistrationUserRequest request,
+                                      HttpServletResponse response) {
+
+        log.trace(ApiLogMessage.NAME_OF_CURRENT_METHOD.getValue(), ApiUtils.getMethodName());
+        IamResponse<UserProfileDTO> result = authService.registrationUser(request);
+        Cookie authorizationCookie = ApiUtils.createAuthCookie(result.getPayload().getToken());
+        response.addCookie(authorizationCookie);
+        return ResponseEntity.ok(result);
+    }
+
 }

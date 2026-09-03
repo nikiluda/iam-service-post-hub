@@ -36,7 +36,8 @@ public class SecurityConfig {
 
     private static final List<String> NOT_SECURED_URLS = List.of(
             "/auth/login",
-            "/auth/register"
+            "/auth/register",
+            "/auth/refresh/token"
     );
 
     @Bean
@@ -45,13 +46,10 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                HttpMethod.OPTIONS,
-                                "/**"
-                        ).permitAll()
-                        .requestMatchers(
-                                NOT_SECURED_URLS.toArray(new String[0])
-                        ).permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        .requestMatchers(NOT_SECURED_URLS.toArray(new String[0])).permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptions -> exceptions

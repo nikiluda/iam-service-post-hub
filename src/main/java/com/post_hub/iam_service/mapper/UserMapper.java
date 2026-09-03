@@ -2,6 +2,7 @@ package com.post_hub.iam_service.mapper;
 
 
 import com.post_hub.iam_service.model.dto.role.RoleDTO;
+import com.post_hub.iam_service.model.dto.user.RegistrationUserRequest;
 import com.post_hub.iam_service.model.dto.user.UserDTO;
 import com.post_hub.iam_service.model.dto.user.UserProfileDTO;
 import com.post_hub.iam_service.model.entity.Role;
@@ -52,7 +53,10 @@ public interface UserMapper {
     UserProfileDTO toUserProfileDto(User user, String token, String refreshToken);
 
 
-
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "roles", ignore = true)
+    @Mapping(target = "registrationStatus", expression = "java(RegistrationStatus.ACTIVE)")
+    User fromDTO(RegistrationUserRequest request);
 
 
 
