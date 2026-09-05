@@ -13,6 +13,7 @@ import com.post_hub.iam_service.model.request.user.UpdateUserRequest;
 import com.post_hub.iam_service.model.response.IamResponse;
 import com.post_hub.iam_service.repository.RoleRepository;
 import com.post_hub.iam_service.repository.UserRepository;
+import com.post_hub.iam_service.security.validation.AccessValidator;
 import com.post_hub.iam_service.service.UserService;
 import com.post_hub.iam_service.service.model.IamServiceUserRole;
 import jakarta.validation.constraints.NotNull;
@@ -35,12 +36,14 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final AccessValidator accessValidator;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, RoleRepository roleRepository, AccessValidator accessValidator) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
+        this.accessValidator = accessValidator;
     }
 
     @Override
@@ -83,6 +86,15 @@ public class UserServiceImpl implements UserService {
     public IamResponse<UserDTO> updateUser(@NotNull Integer userId, @NotNull UpdateUserRequest updateUserRequest) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.USER_NOT_FOUND_BY.getMessage(userId)));
+
+
+        if (userRepository.existsByUsername(updateUserRequest.getUsername())) {
+            throw new DataExistsException(ApiErrorMessage.USERNAME_ALREADY_EXISTS.getMessage(updateUserRequest.getUsername()));
+        }
+
+        if (userRepository.existsByEmail(updateUserRequest.getEmail())) {
+            throw new DataExistsException(ApiErrorMessage.EMAIL_ALREADY_EXISTS.getMessage(updateUserRequest.getEmail()));
+        }
         userMapper.updateUser(user, updateUserRequest);
         user.setUpdated(LocalDateTime.now());
         userRepository.save(user);

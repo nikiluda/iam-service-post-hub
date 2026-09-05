@@ -56,8 +56,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 }
 
                 String email = jwtTokenProvider.getEmail(jwt);
+                String userId = jwtTokenProvider.getUserId(jwt);
 
-                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null && userId != null) {
                     List<SimpleGrantedAuthority> authorities = jwtTokenProvider.getRoles(jwt).stream()
                             .map(SimpleGrantedAuthority::new)
                             .collect(Collectors.toList());

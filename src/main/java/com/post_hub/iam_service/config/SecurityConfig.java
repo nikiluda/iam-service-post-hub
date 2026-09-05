@@ -1,9 +1,9 @@
 package com.post_hub.iam_service.config;
 
-
-import com.post_hub.iam_service.model.entity.User;
 import com.post_hub.iam_service.security.filter.JwtRequestFilter;
+import com.post_hub.iam_service.security.handler.AccessRestrictionHandler;
 import com.post_hub.iam_service.service.UserService;
+import com.post_hub.iam_service.service.model.IamServiceUserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +33,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtRequestFilter jwtRequestFilter;
+    private final AccessRestrictionHandler accessRestrictionHandler;
 
     private static final List<String> NOT_SECURED_URLS = List.of(
             "/auth/login",
@@ -49,6 +50,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         .requestMatchers(NOT_SECURED_URLS.toArray(new String[0])).permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/users/all").hasAllRoles(adminAccessSecurityRoles())
+//                        .requestMatchers(HttpMethod.GET, "/posts/all").hasAllRoles(adminAccessSecurityRoles())
+                                .requestMatchers(HttpMethod.POST, "/users/create").hasAnyAuthority(
+                                        IamServiceUserRole.SUPER_ADMIN.name(),
+                                        IamServiceUserRole.ADMIN.name()
+                                )
 
                         .anyRequest().authenticated()
                 )
@@ -58,6 +65,7 @@ public class SecurityConfig {
                                         HttpStatus.UNAUTHORIZED
                                 )
                         )
+                        .accessDeniedHandler(accessRestrictionHandler)
                 )
                 .addFilterBefore(
                         jwtRequestFilter,
@@ -88,4 +96,12 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManagerBean(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
+
+    private String[] adminAccessSecurityRoles() {
+        return new String[] {
+                IamServiceUserRole.SUPER_ADMIN.name(),
+                IamServiceUserRole.ADMIN.name()
+        };
+    }
+
 }
