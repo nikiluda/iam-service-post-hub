@@ -16,7 +16,9 @@ import com.post_hub.iam_service.model.response.PaginationResponse;
 import com.post_hub.iam_service.repository.PostRepository;
 import com.post_hub.iam_service.repository.UserRepository;
 import com.post_hub.iam_service.repository.criteria.PostSearchCriteria;
+import com.post_hub.iam_service.security.validation.AccessValidator;
 import com.post_hub.iam_service.service.PostService;
+import com.post_hub.iam_service.utils.ApiUtils;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -33,11 +35,15 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final PostMapper postMapper;
     private final UserRepository userRepository;
+    private final AccessValidator accessValidator;
+    private final ApiUtils apiUtils;
 
-    public PostServiceImpl(PostRepository postRepository, PostMapper postMapper, UserRepository userRepository) {
+    public PostServiceImpl(PostRepository postRepository, PostMapper postMapper, UserRepository userRepository, AccessValidator accessValidator, ApiUtils apiUtils) {
         this.postRepository = postRepository;
         this.postMapper = postMapper;
         this.userRepository = userRepository;
+        this.accessValidator = accessValidator;
+        this.apiUtils = apiUtils;
     }
 
 
@@ -46,16 +52,20 @@ public class PostServiceImpl implements PostService {
         Post post  = postRepository.findByIdAndDeletedFalse(postId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(postId)));
 
+
+
         PostDTO postDTO = postMapper.toPostDTO(post);
 
         return IamResponse.createSuccessful(postDTO);
     }
 
     @Override
-    public IamResponse<PostDTO> createPost(@NotNull Integer userId,  NewPostRequest newPostRequest) {
+    public IamResponse<PostDTO> createPost(NewPostRequest newPostRequest) {
         if (postRepository.existsByTitle(newPostRequest.getTitle())) {
             throw new DataExistsException(ApiErrorMessage.POST_ALREADY_EXISTS.getMessage(newPostRequest.getTitle()));
         }
+
+        Integer userId = apiUtils.getUserIdFromAuthentication();
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(userId)));
@@ -72,6 +82,12 @@ public class PostServiceImpl implements PostService {
     public IamResponse<PostDTO> updatePost(@NotNull Integer postId, @NotNull UpdatePostRequest updatePostRequest) {
         Post post = postRepository.findByIdAndDeletedFalse(postId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(postId)));
+        accessValidator.validateAdminOrOwnerAccess(post.getUser().getEmail(), post.getCreatedBy());
+
+        if (postRepository.existsByTitle(updatePostRequest.getTitle())) {
+            throw new DataExistsException(ApiErrorMessage.POST_ALREADY_EXISTS.getMessage(updatePostRequest.getTitle()));
+        }
+
         postMapper.updatePost(post, updatePostRequest);
         post.setUpdated(LocalDateTime.now());
         postRepository.save(post);
@@ -83,6 +99,7 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findByIdAndDeletedFalse(postId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(postId)));
 
+        accessValidator.validateAdminOrOwnerAccess(post.getUser().getEmail(), post.getCreatedBy());
         post.setDeleted(true);
         postRepository.save(post);
     }

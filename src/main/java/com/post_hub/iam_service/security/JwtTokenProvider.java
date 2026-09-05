@@ -93,6 +93,16 @@ public class JwtTokenProvider {
         return getAllClaimsToken(token).get(AuthenticationConstants.ROLE,List.class);
     }
 
+    public String getUsername(String token) {
+        Claims claims = getAllClaimsToken(token);
+        return claims.get(AuthenticationConstants.USERNAME, String.class);
+    }
+
+    public String getUserId(String token) {
+        Claims claims = getAllClaimsToken(token);
+        return String.valueOf(claims.get(AuthenticationConstants.USER_ID));
+    }
+
     private SecretKey getKey(String secretKey64) {
         byte[] decode64 = Decoders.BASE64.decode(secretKey64);
         return Keys.hmacShaKeyFor(decode64);

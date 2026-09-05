@@ -10,15 +10,17 @@ import com.post_hub.iam_service.model.entity.Role;
 import com.post_hub.iam_service.model.entity.User;
 import com.post_hub.iam_service.model.exception.DataExistsException;
 import com.post_hub.iam_service.model.exception.InvalidDataException;
+import com.post_hub.iam_service.model.exception.InvalidPasswordException;
 import com.post_hub.iam_service.model.exception.NotFoundException;
 import com.post_hub.iam_service.model.response.IamResponse;
-import com.post_hub.iam_service.repository.RefreshTokenRepository;
 import com.post_hub.iam_service.repository.RoleRepository;
 import com.post_hub.iam_service.repository.UserRepository;
 import com.post_hub.iam_service.security.JwtTokenProvider;
+import com.post_hub.iam_service.security.validation.AccessValidator;
 import com.post_hub.iam_service.service.AuthService;
 import com.post_hub.iam_service.service.RefreshTokenService;
 import com.post_hub.iam_service.service.model.IamServiceUserRole;
+import com.post_hub.iam_service.utils.PasswordUtils;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +46,7 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenService refreshTokenService;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AccessValidator accessValidator;
 
 
     @Override
@@ -82,14 +85,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public IamResponse<UserProfileDTO> registrationUser(@NotNull RegistrationUserRequest request) {
 
-        userRepository.findByUsername(request.getUsername()).ifPresent(existingUser -> {
-            throw new DataExistsException(ApiErrorMessage.USERNAME_ALREADY_EXISTS.getMessage(request.getUsername()));
-        });
-
-        userRepository.findByEmail(request.getEmail()).ifPresent(existingUser -> {
-            throw new DataExistsException(ApiErrorMessage.EMAIL_ALREADY_EXISTS.getMessage(request.getEmail()));
-        });
-
+        accessValidator.validateNewUser(request.getUsername(), request.getEmail(), request.getPassword(), request.getConfirmPassword());
 
         Role userRole = roleRepository.findByName(IamServiceUserRole.USER.getRole())
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.USER_ROLE_NOT_FOUND.getMessage()));

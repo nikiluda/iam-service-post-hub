@@ -3,6 +3,7 @@ package com.post_hub.iam_service.advice;
 import com.post_hub.iam_service.model.constants.ApiConstants;
 import com.post_hub.iam_service.model.exception.DataExistsException;
 import com.post_hub.iam_service.model.exception.InvalidDataException;
+import com.post_hub.iam_service.model.exception.InvalidPasswordException;
 import com.post_hub.iam_service.model.exception.NotFoundException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -12,8 +13,11 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 
+import java.nio.file.AccessDeniedException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +27,8 @@ import java.util.Objects;
 @ControllerAdvice
 public class CommonControllerAdvice {
 
-    @ExceptionHandler(NotFoundException.class)
+    @ExceptionHandler
+    @ResponseBody
     protected ResponseEntity<String> handleNotFoundException(
             NotFoundException exception
     ) {
@@ -35,6 +40,7 @@ public class CommonControllerAdvice {
     }
 
     @ExceptionHandler(DataExistsException.class)
+    @ResponseBody
     protected ResponseEntity<String> handleDataExistException(
             DataExistsException exception
     ) {
@@ -46,6 +52,7 @@ public class CommonControllerAdvice {
     }
 
     @ExceptionHandler(InvalidDataException.class)
+    @ResponseBody
     protected ResponseEntity<String> handleInvalidDataException(
             InvalidDataException exception
     ) {
@@ -69,6 +76,20 @@ public class CommonControllerAdvice {
         return ResponseEntity
                 .badRequest()
                 .body(errors);
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public String handleInvalidPasswordException(InvalidPasswordException exception) {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseBody
+    protected ResponseEntity<String> handleAccessDeniedException(AccessDeniedException exception) {
+        logStackTrace(exception);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage().toString());
     }
 
     private void logStackTrace(Exception exception) {

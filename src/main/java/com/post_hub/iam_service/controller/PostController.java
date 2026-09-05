@@ -17,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,13 +47,13 @@ public class PostController {
 
     @PostMapping("${end-points.create}")
     public ResponseEntity<IamResponse<PostDTO>> createPost(
-            @RequestBody @Valid NewPostRequest newPostRequest) {
+            @RequestBody @Valid NewPostRequest newPostRequest,
+            Authentication authentication) {
         log.trace(ApiLogMessage.NAME_OF_CURRENT_METHOD.getValue(), ApiUtils.getMethodName());
 
 
-        //TODO:replace 1 with the real user_id
-        int userId = 1;
-        IamResponse<PostDTO> response = postService.createPost(userId, newPostRequest);
+        String username= authentication.getName();
+        IamResponse<PostDTO> response = postService.createPost(newPostRequest);
 
         return ResponseEntity.ok(response);
     }
