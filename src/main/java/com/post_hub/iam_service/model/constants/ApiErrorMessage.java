@@ -14,6 +14,7 @@ public enum ApiErrorMessage {
     USER_ROLE_NOT_FOUND("Role was not found"),
     EMAIL_NOT_FOUND("Email: %s was not found"),
     USERNAME_NOT_FOUND("Username was not found"),
+    COMMENT_NOT_FOUND_BY_ID("Comment with ID %s was not found"),
 
 
     ERROR_DURING_JWT_PROCESSING("An unexpected error occurred during JWT processing"),
