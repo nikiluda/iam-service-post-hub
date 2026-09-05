@@ -47,6 +47,7 @@ end-points:
   refresh:
     token: /refresh/token
   register: /register
+  comments: /comments
 
 jwt:
   secret: AQluFxA7o6Hp+QZq4Q8GxQhjBC49M+a/HBjgob2dUwMroeWlfSxdl3bB/07PQgKlWl6NaJZiAeektuCi/CAuMw==

@@ -18,6 +18,7 @@ public interface CommentMapper {
     @Mapping(source = "user.id", target = "owner.id")
     @Mapping(source = "user.username", target = "owner.username")
     @Mapping(source = "user.email", target = "owner.email")
-    @Mapping(source = "post.id", target = "post.id")
+    @Mapping(source = "post.id", target = "postId")
+    @Mapping(source = "updated", target = "update")
     CommentDTO toDto(Comment comment);
 }
