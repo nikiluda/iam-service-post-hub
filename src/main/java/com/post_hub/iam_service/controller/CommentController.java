@@ -1,5 +1,4 @@
 package com.post_hub.iam_service.controller;
-
 import com.post_hub.iam_service.model.constants.ApiErrorMessage;
 import com.post_hub.iam_service.model.constants.ApiLogMessage;
 import com.post_hub.iam_service.model.dto.comment.CommentDTO;
@@ -9,7 +8,6 @@ import com.post_hub.iam_service.model.response.IamResponse;
 import com.post_hub.iam_service.service.CommentService;
 import com.post_hub.iam_service.utils.ApiUtils;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -50,6 +48,14 @@ public class CommentController {
 
         IamResponse<CommentDTO> result = commentService.updateComment(commentId, updateCommentRequest);
         return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("${end-points.id}")
+    public ResponseEntity<Void> softDeleteComment(@PathVariable("id") Integer commentId) {
+        log.trace(ApiLogMessage.NAME_OF_CURRENT_METHOD.getValue(), ApiUtils.getMethodName());
+
+        commentService.softDeleteComment(commentId);
+        return ResponseEntity.noContent().build();
     }
 
 

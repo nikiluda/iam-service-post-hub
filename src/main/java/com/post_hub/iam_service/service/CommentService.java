@@ -13,4 +13,6 @@ public interface CommentService {
     IamResponse<CommentDTO> createComment(@NotNull CommentRequest commentRequest);
 
     IamResponse<CommentDTO> updateComment(@NotNull Integer commentId, @NotNull UpdateCommentRequest updateCommentRequest);
+
+    void softDeleteComment(@NotNull Integer commentId);
 }
