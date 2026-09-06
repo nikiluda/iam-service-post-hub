@@ -8,6 +8,7 @@ import com.post_hub.iam_service.model.entity.Post;
 import com.post_hub.iam_service.model.entity.User;
 import com.post_hub.iam_service.model.exception.NotFoundException;
 import com.post_hub.iam_service.model.request.comment.CommentRequest;
+import com.post_hub.iam_service.model.request.comment.UpdateCommentRequest;
 import com.post_hub.iam_service.model.response.IamResponse;
 import com.post_hub.iam_service.repository.CommentRepository;
 import com.post_hub.iam_service.repository.PostRepository;
@@ -51,5 +52,23 @@ public class CommentServiceImpl implements CommentService {
         postRepository.save(post);
 
         return IamResponse.createSuccessful(commentMapper.toDto(comment));
+    }
+
+    @Override
+    public IamResponse<CommentDTO> updateComment(@NotNull Integer commentId, @NotNull UpdateCommentRequest updateCommentRequest) {
+        Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
+                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.COMMENT_NOT_FOUND_BY_ID.getMessage(commentId)));
+
+        if (updateCommentRequest.getPostId() != null) {
+            Post post = postRepository.findByIdAndDeletedFalse(updateCommentRequest.getPostId())
+                    .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(updateCommentRequest.getPostId())));
+            comment.setPost(post);
+        }
+
+        commentMapper.updateComment(comment, updateCommentRequest);
+        commentRepository.save(comment);
+
+        return IamResponse.createSuccessful(commentMapper.toDto(comment));
+
     }
 }
