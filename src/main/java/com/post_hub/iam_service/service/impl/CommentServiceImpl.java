@@ -18,6 +18,7 @@ import com.post_hub.iam_service.repository.CommentRepository;
 import com.post_hub.iam_service.repository.PostRepository;
 import com.post_hub.iam_service.repository.UserRepository;
 import com.post_hub.iam_service.repository.criteria.CommentSearchCriteria;
+import com.post_hub.iam_service.security.validation.AccessValidator;
 import com.post_hub.iam_service.service.CommentService;
 import com.post_hub.iam_service.utils.ApiUtils;
 import jakarta.validation.constraints.NotNull;
@@ -42,6 +43,7 @@ public class CommentServiceImpl implements CommentService {
     private final PostRepository postRepository;
     private final PostMapper postMapper;
     private final PathPatternRequestMatcher.Builder builder;
+    private final AccessValidator accessValidator;
 
     @Override
     public IamResponse<CommentDTO> getCommentById(@NotNull Integer commentId) {
@@ -70,6 +72,7 @@ public class CommentServiceImpl implements CommentService {
     public IamResponse<CommentDTO> updateComment(@NotNull Integer commentId, @NotNull UpdateCommentRequest updateCommentRequest) {
         Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.COMMENT_NOT_FOUND_BY_ID.getMessage(commentId)));
+
 
         if (updateCommentRequest.getPostId() != null) {
             Post post = postRepository.findByIdAndDeletedFalse(updateCommentRequest.getPostId())
