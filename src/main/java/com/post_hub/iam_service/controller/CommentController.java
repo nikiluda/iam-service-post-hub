@@ -3,18 +3,17 @@ package com.post_hub.iam_service.controller;
 import com.post_hub.iam_service.model.constants.ApiLogMessage;
 import com.post_hub.iam_service.model.dto.comment.CommentDTO;
 import com.post_hub.iam_service.model.entity.Comment;
+import com.post_hub.iam_service.model.request.comment.CommentRequest;
 import com.post_hub.iam_service.model.response.IamResponse;
 import com.post_hub.iam_service.service.CommentService;
 import com.post_hub.iam_service.utils.ApiUtils;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @Validated
@@ -32,6 +31,14 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
+    @PostMapping("${end-points.create}")
+    public ResponseEntity<IamResponse<CommentDTO>> createComment(@RequestBody @Valid CommentRequest commentRequest) {
+
+
+        log.trace(ApiLogMessage.NAME_OF_CURRENT_METHOD.getValue(), ApiUtils.getMethodName());
+        IamResponse<CommentDTO> result = commentService.createComment(commentRequest);
+        return ResponseEntity.ok(result);
+    }
 
 
 
