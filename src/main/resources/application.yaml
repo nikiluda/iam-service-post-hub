@@ -61,5 +61,5 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
   servers:
-    - url: http://localhost:8189
+    - first: http://localhost:8189
       description: Local server
