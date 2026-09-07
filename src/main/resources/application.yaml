@@ -53,3 +53,13 @@ jwt:
   secret: AQluFxA7o6Hp+QZq4Q8GxQhjBC49M+a/HBjgob2dUwMroeWlfSxdl3bB/07PQgKlWl6NaJZiAeektuCi/CAuMw==
   lifetime: 3600000
   expiration: 103600000
+
+# Swagger
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+  servers:
+    - url: http://localhost:8189
+      description: Local server

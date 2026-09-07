@@ -38,7 +38,11 @@ public class SecurityConfig {
     private static final List<String> NOT_SECURED_URLS = List.of(
             "/auth/login",
             "/auth/register",
-            "/auth/refresh/token"
+            "/auth/refresh/token",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "//webjars/**"
     );
 
     @Bean
